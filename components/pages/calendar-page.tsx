@@ -3,7 +3,28 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NeoCard } from "@/components/neo-card";
-import { MiniBlobFace } from "@/components/blob-face";
+import {
+  HappyGreenMood,
+  SadOrangeMood,
+  FrustratedGreenMood,
+  SadBlueMood,
+  SadPurpleMood,
+  HappyBlueMood,
+  HappyPinkMood
+} from "@/components/common-svgs";
+
+const getMoodSvg = (moodId: string, size: number) => {
+  switch (moodId) {
+    case "happy": return <HappyPinkMood size={size} />;
+    case "calm": return <HappyBlueMood size={size} />;
+    case "anxious": return <SadPurpleMood size={size} />;
+    case "frustrated": return <FrustratedGreenMood size={size} />;
+    case "lonely": return <SadBlueMood size={size} />;
+    case "tired": return <SadOrangeMood size={size} />;
+    case "grateful": return <HappyGreenMood size={size} />;
+    default: return <HappyGreenMood size={size} />;
+  }
+};
 import { getSessions, getSessionsForMonth, getDominantMood, calculateStreak, initializeSessions, type Session } from "@/lib/storage";
 import { getMoodById, MOODS } from "@/lib/moods";
 import {
@@ -289,14 +310,12 @@ export function CalendarPage() {
                   className="w-full aspect-square flex items-center justify-center relative"
                   style={{
                     borderRadius: "8px",
-                    backgroundColor: session ? session.colour : "#FFFBF0",
+                    backgroundColor: mood ? mood.colour : "#FFFBF0",
                     border: isToday(day) ? "3px solid #111111" : session ? "2px solid #111111" : "2px dashed #D4D4D4",
                     boxShadow: session ? "2px 2px 0px #111111" : "none",
                   }}
                 >
-                  {mood && (
-                    <MiniBlobFace expression={mood.faceExpression} size={24} />
-                  )}
+                  {mood && getMoodSvg(mood.id, 40)}
                 </motion.button>
               );
             })}
@@ -326,7 +345,7 @@ export function CalendarPage() {
             frontTitle={
               dominantMood ? (
                 <div className="flex items-center justify-center mt-1">
-                  <MiniBlobFace expression={dominantMood.faceExpression} size={50} />
+                  {getMoodSvg(dominantMood.id, 50)}
                 </div>
               ) : "-"
             }

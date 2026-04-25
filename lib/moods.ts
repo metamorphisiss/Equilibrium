@@ -27,7 +27,7 @@ export const MOODS: Mood[] = [
   {
     id: "happy",
     label: "Happy",
-    colour: "#FFE566",
+    colour: "#FFCDD2",
     valence: 0.8,
     arousal: 0.6,
     blobPath: BLOB_PATHS.happy,
@@ -38,7 +38,7 @@ export const MOODS: Mood[] = [
   {
     id: "calm",
     label: "Calm",
-    colour: "#A8E6CF",
+    colour: "#B2EBF2",
     valence: 0.6,
     arousal: -0.5,
     blobPath: BLOB_PATHS.calm,
@@ -49,7 +49,7 @@ export const MOODS: Mood[] = [
   {
     id: "anxious",
     label: "Anxious",
-    colour: "#C9B8FF",
+    colour: "#D2B4DE",
     valence: -0.5,
     arousal: 0.7,
     blobPath: BLOB_PATHS.anxious,
@@ -60,7 +60,7 @@ export const MOODS: Mood[] = [
   {
     id: "frustrated",
     label: "Frustrated",
-    colour: "#FF8C69",
+    colour: "#A5D6A7",
     valence: -0.7,
     arousal: 0.8,
     blobPath: BLOB_PATHS.frustrated,
@@ -71,7 +71,7 @@ export const MOODS: Mood[] = [
   {
     id: "lonely",
     label: "Lonely",
-    colour: "#B8D4FF",
+    colour: "#5DADE2",
     valence: -0.6,
     arousal: -0.4,
     blobPath: BLOB_PATHS.lonely,
@@ -82,7 +82,7 @@ export const MOODS: Mood[] = [
   {
     id: "tired",
     label: "Tired",
-    colour: "#D4D4D4",
+    colour: "#FFB74D",
     valence: -0.2,
     arousal: -0.7,
     blobPath: BLOB_PATHS.tired,
@@ -93,7 +93,7 @@ export const MOODS: Mood[] = [
   {
     id: "grateful",
     label: "Grateful",
-    colour: "#FFB8D4",
+    colour: "#C5E1A5",
     valence: 0.9,
     arousal: 0.3,
     blobPath: BLOB_PATHS.grateful,

@@ -3,6 +3,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import type { Mood } from "@/lib/moods";
 import { BlobFace } from "./blob-face";
+import {
+  HappyGreenMood,
+  SadOrangeMood,
+  FrustratedGreenMood,
+  SadBlueMood,
+  SadPurpleMood,
+  HappyBlueMood,
+  HappyPinkMood
+} from "./common-svgs";
 
 interface SquircleCharacterProps {
   mood: Mood;
@@ -10,6 +19,19 @@ interface SquircleCharacterProps {
 }
 
 export function SquircleCharacter({ mood, size = 220 }: SquircleCharacterProps) {
+  const getMoodSvg = () => {
+    switch (mood.id) {
+      case "happy": return <HappyPinkMood size={size} />;
+      case "calm": return <HappyBlueMood size={size} />;
+      case "anxious": return <SadPurpleMood size={size} />;
+      case "frustrated": return <FrustratedGreenMood size={size} />;
+      case "lonely": return <SadBlueMood size={size} />;
+      case "tired": return <SadOrangeMood size={size} />;
+      case "grateful": return <HappyGreenMood size={size} />;
+      default: return <HappyGreenMood size={size} />;
+    }
+  };
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -21,29 +43,7 @@ export function SquircleCharacter({ mood, size = 220 }: SquircleCharacterProps) 
         className="relative flex items-center justify-center"
         style={{ width: size, height: size }}
       >
-        <motion.div
-          animate={{
-            borderRadius: [
-              "38% 62% 55% 45% / 45% 38% 62% 55%",
-              "55% 45% 38% 62% / 62% 55% 45% 38%",
-              "38% 62% 55% 45% / 45% 38% 62% 55%",
-            ],
-          }}
-          transition={{
-            duration: 4,
-            ease: "easeInOut",
-            repeat: Infinity,
-          }}
-          className="absolute inset-0"
-          style={{
-            backgroundColor: mood.colour,
-            border: "2px solid #111111",
-            boxShadow: "4px 4px 0px #111111",
-          }}
-        />
-        <div className="relative z-10" style={{ width: size * 0.6, height: size * 0.6 }}>
-          <BlobFace expression={mood.faceExpression} size={size * 0.6} />
-        </div>
+        {getMoodSvg()}
       </motion.div>
     </AnimatePresence>
   );
