@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { NeoButton } from "@/components/neo-button";
 import { NeoCard } from "@/components/neo-card";
-import { BreathingBlob } from "@/components/squircle-character";
+import { SquircleCharacter } from "@/components/squircle-character";
 import type { Session } from "@/lib/storage";
 import { getMoodById } from "@/lib/moods";
 
@@ -59,7 +59,7 @@ export function ResultPage() {
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
       >
-        <BreathingBlob colour={session.colour} size={160} />
+        <SquircleCharacter mood={mood} size={180} />
       </motion.div>
 
       <motion.h1

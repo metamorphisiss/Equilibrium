@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BreathingBlob } from "@/components/squircle-character";
+import { HappyGreenMood } from "@/components/common-svgs";
 import { NeoButton } from "@/components/neo-button";
 import { NeoCard } from "@/components/neo-card";
 import { getUser, saveUser } from "@/lib/storage";
@@ -45,7 +45,7 @@ export function OnboardingPage() {
       style={{ backgroundColor: "#FFFBF0" }}
     >
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
-        <BreathingBlob colour="#A8E6CF" size={140} />
+        <HappyGreenMood size={140} />
 
         <div className="text-center">
           <h1 className="font-heading text-3xl font-bold text-[#111111] mb-2">

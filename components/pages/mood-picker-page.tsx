@@ -276,7 +276,7 @@ export function MoodPickerPage() {
               backgroundColor: selectedMood.colour + "33",
             }}
           >
-            <p className="font-sans text-xs text-[#888888] uppercase tracking-widest mb-1">Today's affirmation</p>
+            <p className="font-sans text-xs text-[#888888] uppercase tracking-widest mb-1">Affirm your emotions</p>
             <p className="font-heading text-base font-bold text-[#111111] italic">
               "{selectedMood.affirmation}"
             </p>

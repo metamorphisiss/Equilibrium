@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BackButton } from "@/components/navigation";
 import { NeoButton } from "@/components/neo-button";
-import { BreathingBlob } from "@/components/squircle-character";
+import { SquircleCharacter } from "@/components/squircle-character";
 import { addSession, type Session } from "@/lib/storage";
 import type { Mood } from "@/lib/moods";
 
@@ -76,7 +76,7 @@ export function JournalPage() {
       </div>
 
       <div className="flex-1 px-4 pb-8 flex flex-col items-center">
-        <BreathingBlob colour={state.mood.colour} size={120} />
+        <SquircleCharacter mood={state.mood} size={140} />
 
         <h2 className="font-heading text-xl font-bold text-[#111111] mt-4">
           {state.mood.label}

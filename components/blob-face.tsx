@@ -1,6 +1,7 @@
 "use client";
 
-import type { FaceExpression } from "@/lib/moods";
+import type { Mood, FaceExpression } from "@/lib/moods";
+import { motion } from "framer-motion";
 
 interface BlobFaceProps {
   expression: FaceExpression;
@@ -231,5 +232,60 @@ export function MiniBlobFace({ expression, size = 24 }: BlobFaceProps) {
       {renderEyes()}
       {renderMouth()}
     </svg>
+  );
+}
+
+interface OrganicMoodBlobProps {
+  mood: Mood;
+  size?: number;
+}
+
+export function OrganicMoodBlob({ mood, size = 150 }: OrganicMoodBlobProps) {
+  return (
+    <motion.div
+      className="relative flex items-center justify-center"
+      style={{ width: size, height: size }}
+      animate={{
+        scale: [1, 1.05, 1],
+        rotate: [0, 1, -1, 0],
+      }}
+      transition={{
+        duration: 4,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      <svg
+        viewBox="0 0 100 100"
+        className="absolute inset-0 drop-shadow-xl overflow-visible"
+        style={{ width: size, height: size }}
+      >
+        {/* Shadow layer for Neo-Brutalism */}
+        <path
+          d={mood.blobPath}
+          fill="#111111"
+          transform="translate(4, 4)"
+        />
+        {/* Main blob body */}
+        <path
+          d={mood.blobPath}
+          fill={mood.colour}
+          stroke="#111111"
+          strokeWidth="3.5"
+        />
+        {/* Subtle highlight */}
+        <path
+          d="M 30 30 Q 40 20 50 30"
+          stroke="white"
+          strokeWidth="3"
+          strokeLinecap="round"
+          opacity="0.4"
+          fill="none"
+        />
+      </svg>
+      <div className="relative z-10" style={{ width: size * 0.45, height: size * 0.45 }}>
+        <BlobFace expression={mood.faceExpression} size={size * 0.45} />
+      </div>
+    </motion.div>
   );
 }
