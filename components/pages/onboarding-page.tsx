@@ -45,8 +45,8 @@ export function OnboardingPage() {
       className="min-h-screen flex flex-col items-center px-6 overflow-x-hidden"
       style={{ backgroundColor: "#FFFBF0" }}
     >
+      <LogoLoop />
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
-        <BreathingBlob colour="#A8E6CF" size={140} />
 
         <div className="text-center">
           <h1 className="font-heading text-3xl font-bold text-[#111111] mb-2">

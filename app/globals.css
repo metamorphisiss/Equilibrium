@@ -26,6 +26,28 @@
   --radius: 0.625rem;
 }
 
+.dark {
+  --background: #111111;
+  --foreground: #FFFBF0;
+  --card: #1a1a1a;
+  --card-foreground: #FFFBF0;
+  --popover: #1a1a1a;
+  --popover-foreground: #FFFBF0;
+  --primary: #FFFBF0;
+  --primary-foreground: #111111;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #FFFBF0;
+  --muted: #333333;
+  --muted-foreground: #999999;
+  --accent: #A8E6CF;
+  --accent-foreground: #111111;
+  --destructive: #FF6B6B;
+  --destructive-foreground: #FFFFFF;
+  --border: #FFFBF0;
+  --input: #FFFBF0;
+  --ring: #FFFBF0;
+}
+
 @theme inline {
   --font-sans: 'Inter', 'Inter Fallback', sans-serif;
   --font-heading: 'Space Grotesk', 'Space Grotesk Fallback', sans-serif;
