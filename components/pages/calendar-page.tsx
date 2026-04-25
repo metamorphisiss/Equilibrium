@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NeoCard } from "@/components/neo-card";
 import { MiniBlobFace } from "@/components/blob-face";
-import { getSessions, getSessionsForMonth, getDominantMood, calculateStreak, type Session } from "@/lib/storage";
+import { getSessions, getSessionsForMonth, getDominantMood, calculateStreak, initializeSessions, type Session } from "@/lib/storage";
 import { getMoodById, MOODS } from "@/lib/moods";
 import {
   Drawer,
@@ -12,6 +12,48 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+const RevealCard = ({
+  frontTitle,
+  frontSubtitle,
+  backTitle,
+  backDesc,
+  colorHex = "#FFFBF0",
+}: {
+  frontTitle: React.ReactNode;
+  frontSubtitle: string;
+  backTitle: string;
+  backDesc: string;
+  colorHex?: string;
+}) => {
+  return (
+    <div className="group relative block aspect-square cursor-pointer outline-none w-full">
+      <span className="absolute inset-0 border-[3px] border-dashed border-[#111111] rounded-xl pointer-events-none"></span>
+
+      <div
+        className="relative flex h-full transform flex-col items-center justify-center border-[3px] border-[#111111] bg-white rounded-xl transition-transform duration-300 group-hover:-translate-x-1.5 group-hover:-translate-y-1.5"
+        style={{ backgroundColor: colorHex }}
+      >
+        <div className="p-2 transition-opacity duration-300 group-hover:absolute group-hover:opacity-0 flex flex-col items-center justify-center w-full h-full text-center">
+          <div className="font-heading text-3xl md:text-4xl font-black text-[#111111] mb-1">
+            {frontTitle}
+          </div>
+          <div className="font-sans text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-[#111111]">
+            {frontSubtitle}
+          </div>
+        </div>
+
+        <div className="absolute p-2 opacity-0 transition-opacity duration-300 group-hover:relative group-hover:opacity-100 flex flex-col items-center justify-center w-full h-full text-center">
+          <h3 className="text-[10px] md:text-xs font-heading font-bold text-[#111111] uppercase mb-1">
+            {backTitle}
+          </h3>
+          <p className="text-[8px] md:text-[10px] font-sans text-[#111111] leading-tight font-medium">
+            {backDesc}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -23,6 +65,7 @@ export function CalendarPage() {
   const month = currentDate.getMonth();
 
   useEffect(() => {
+    initializeSessions();
     setSessions(getSessions());
   }, []);
 
@@ -87,17 +130,87 @@ export function CalendarPage() {
   };
 
   const last7Sessions = sessions.slice(0, 7);
-  const mockPoints = [
-    { valence: -0.6, arousal: 0.7, colour: "#C9B8FF" },
-    { valence: -0.5, arousal: 0.5, colour: "#FF8C69" },
-    { valence: -0.3, arousal: 0.3, colour: "#C9B8FF" },
-    { valence: 0.1, arousal: 0.1, colour: "#D4D4D4" },
-    { valence: 0.4, arousal: -0.2, colour: "#A8E6CF" },
-    { valence: 0.6, arousal: -0.4, colour: "#A8E6CF" },
-    { valence: 0.8, arousal: -0.5, colour: "#FFB8D4" },
-  ];
 
-  const scatterPoints = last7Sessions.length >= 3 ? last7Sessions : mockPoints;
+  const generateInsight = () => {
+    if (last7Sessions.length < 3) return "Log a few more sessions to unlock your weekly insights.";
+    
+    const avgArousal = last7Sessions.reduce((acc, s) => acc + s.arousal, 0) / last7Sessions.length;
+    const avgValence = last7Sessions.reduce((acc, s) => acc + s.valence, 0) / last7Sessions.length;
+    
+    if (avgArousal > 0.3 && avgValence < 0) return "Your energy was high this week, but sentiment was low. This points to stress or anxiety. Try 'Box Breathing' to center yourself.";
+    if (avgArousal < -0.3 && avgValence < 0) return "You've had a low-energy, low-sentiment week. It's okay to rest. The 'Calm' breathing pattern might help you ease tension.";
+    if (avgValence > 0.3) return "You've had a highly positive week! Keep up whatever routines you've been doing—they are working.";
+    return "Your week has been relatively balanced. Maintain your consistency!";
+  };
+
+  const getMoodDistributionBar = () => {
+    if (last7Sessions.length === 0) return null;
+    const counts: Record<string, number> = {};
+    last7Sessions.forEach(s => counts[s.moodId] = (counts[s.moodId] || 0) + 1);
+    
+    return Object.entries(counts).map(([moodId, count]) => {
+      const mood = getMoodById(moodId);
+      const percentage = (count / last7Sessions.length) * 100;
+      return (
+        <div 
+          key={moodId} 
+          style={{ width: `${percentage}%`, backgroundColor: mood?.colour }}
+          className="h-full border-r-[3px] last:border-r-0 border-[#111111]"
+        />
+      );
+    });
+  };
+
+  const getMoodDistributionLegend = () => {
+    if (last7Sessions.length === 0) return null;
+    const counts: Record<string, number> = {};
+    last7Sessions.forEach(s => counts[s.moodId] = (counts[s.moodId] || 0) + 1);
+    
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([moodId, count]) => {
+      const mood = getMoodById(moodId);
+      const percentage = Math.round((count / last7Sessions.length) * 100);
+      return (
+        <div key={moodId} className="flex items-center gap-1.5">
+          <div 
+            className="w-3 h-3 rounded-full border-[2px] border-[#111111]"
+            style={{ backgroundColor: mood?.colour }}
+          />
+          <span className="font-sans text-[10px] font-bold text-[#111111] uppercase">
+            {mood?.label} ({percentage}%)
+          </span>
+        </div>
+      );
+    });
+  };
+
+  const renderTrendChart = () => {
+    if (last7Sessions.length < 2) return null;
+    
+    const reversed = [...last7Sessions].reverse();
+    const width = 300;
+    const height = 100;
+    const step = width / Math.max(1, reversed.length - 1);
+    
+    const arousalPoints = reversed.map((s, i) => `${i * step},${height - ((s.arousal + 1) / 2) * height}`).join(" ");
+    const valencePoints = reversed.map((s, i) => `${i * step},${height - ((s.valence + 1) / 2) * height}`).join(" ");
+
+    return (
+      <svg viewBox={`-5 -5 ${width + 10} ${height + 25}`} className="w-full">
+        {/* Guidelines */}
+        <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke="#E5E5E5" strokeWidth="2" strokeDasharray="4 4" />
+        
+        <polyline points={arousalPoints} fill="none" stroke="#FF6B6B" strokeWidth="3" strokeDasharray="6 4" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points={valencePoints} fill="none" stroke="#60A5FA" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Legend */}
+        <circle cx="10" cy={height + 15} r="5" fill="#60A5FA" stroke="#111111" strokeWidth="2" />
+        <text x="20" y={height + 19} fontSize="10" fontWeight="bold" fill="#111111" className="font-sans uppercase">Sentiment</text>
+        
+        <circle cx="100" cy={height + 15} r="5" fill="#FF6B6B" stroke="#111111" strokeWidth="2" />
+        <text x="110" y={height + 19} fontSize="10" fontWeight="bold" fill="#111111" className="font-sans uppercase">Energy</text>
+      </svg>
+    );
+  };
 
   return (
     <motion.div
@@ -105,173 +218,164 @@ export function CalendarPage() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.25 }}
-      className="min-h-screen pb-24 md:pb-8"
+      className="min-h-screen pb-24 md:pb-8 relative overflow-hidden"
       style={{ backgroundColor: "#FFFBF0" }}
     >
-      <div className="max-w-lg mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="font-heading text-xl font-bold text-[#111111]">
-            Mood Calendar
+      {/* Neo-brutalist Grid Background */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0 opacity-[0.07]"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, #111111 1px, transparent 1px),
+            linear-gradient(to bottom, #111111 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px"
+        }}
+      />
+
+      <div className="max-w-lg mx-auto px-4 py-6 relative z-10">
+        <div className="mb-6 print:hidden">
+          <h1 className="font-heading text-3xl font-black text-[#111111] uppercase tracking-wide">
+            Monthly Mood Calendar
           </h1>
-          <div className="flex items-center gap-3">
-            <button onClick={goToPrevMonth} className="p-1">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M12 15L7 10L12 5" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <span className="font-sans text-sm text-[#666666]">
+        </div>
+
+        <NeoCard className="p-5 mb-6 print:hidden">
+          <div className="flex items-center justify-between mb-4 border-b-[3px] border-[#111111] pb-4">
+            <span className="font-heading text-xl font-bold text-[#111111] uppercase">
               {monthName} {year}
             </span>
-            <button onClick={goToNextMonth} className="p-1">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M8 5L13 10L8 15" stroke="#111111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div key={day} className="text-center font-sans text-xs text-[#888888]">
-              {day}
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-7 gap-1 mb-6">
-          {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="w-11 h-11" />
-          ))}
-          {Array.from({ length: daysInMonth }).map((_, i) => {
-            const day = i + 1;
-            const session = getSessionForDate(day);
-            const mood = session ? getMoodById(session.moodId) : null;
-
-            return (
-              <motion.button
-                key={day}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.02 }}
-                onClick={() => handleDayClick(session)}
-                className="w-11 h-11 flex items-center justify-center relative"
-                style={{
-                  borderRadius: "10px",
-                  backgroundColor: session ? session.colour : "#FFFBF0",
-                  border: isToday(day) ? "2px solid #111111" : "none",
-                }}
-              >
-                {mood && (
-                  <MiniBlobFace expression={mood.faceExpression} size={24} />
-                )}
-              </motion.button>
-            );
-          })}
-        </div>
-
-        <NeoCard className="p-5 mb-4">
-          <p className="font-sans text-xs text-[#888888] mb-1">Monthly Mood Summary</p>
-          {dominantMood ? (
-            <>
-              <h2
-                className="font-heading text-4xl font-bold mb-2"
-                style={{ color: dominantMood.colour }}
-              >
-                {dominantMood.label}
-              </h2>
-              <p className="font-sans text-sm text-[#888888] mb-4">
-                {dominantMood.affirmation}
-              </p>
-            </>
-          ) : (
-            <p className="font-heading text-2xl font-bold text-[#888888] mb-4">
-              No entries yet
-            </p>
-          )}
-
-          <div className="border-t border-[#E5E5E5] pt-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="font-heading text-2xl font-bold text-[#111111]">
-                  {monthSessions.length}
-                </p>
-                <p className="font-sans text-xs text-[#888888]">Sessions</p>
-              </div>
-              <div className="text-center">
-                <p className="font-heading text-2xl font-bold text-[#111111]">
-                  {streak}
-                </p>
-                <p className="font-sans text-xs text-[#888888]">Streak</p>
-              </div>
-              <div className="text-center">
-                <p className="font-heading text-2xl font-bold text-[#111111]">
-                  {getTopMoodLabel()}
-                </p>
-                <p className="font-sans text-xs text-[#888888]">Top Mood</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <button onClick={goToPrevMonth} className="p-2 border-[3px] border-[#111111] rounded-lg bg-white hover:bg-[#FFFBF0] transition-colors shadow-[2px_2px_0px_#111111] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <path d="M12 15L7 10L12 5" stroke="#111111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <button onClick={goToNextMonth} className="p-2 border-[3px] border-[#111111] rounded-lg bg-white hover:bg-[#FFFBF0] transition-colors shadow-[2px_2px_0px_#111111] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <path d="M8 5L13 10L8 15" stroke="#111111" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
           </div>
-        </NeoCard>
 
-        <NeoCard className="p-4">
-          <p className="font-sans text-xs text-[#888888] mb-3">7-Day Scatter</p>
-          <svg
-            viewBox="0 0 340 200"
-            className="w-full"
-            style={{
-              border: "2px solid #111111",
-              borderRadius: "12px",
-              boxShadow: "4px 4px 0px #111111",
-            }}
-          >
-            <line x1="170" y1="10" x2="170" y2="190" stroke="#E5E5E5" strokeWidth="1" />
-            <line x1="10" y1="100" x2="330" y2="100" stroke="#E5E5E5" strokeWidth="1" />
+          <div className="grid grid-cols-7 gap-1 mb-3">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              <div key={day} className="text-center font-sans text-[10px] font-bold text-[#111111] uppercase tracking-wider">
+                {day}
+              </div>
+            ))}
+          </div>
 
-            <text x="15" y="25" className="font-sans" fontSize="9" fill="#888888" opacity="0.5">Stressed</text>
-            <text x="280" y="25" className="font-sans" fontSize="9" fill="#888888" opacity="0.5">Excited</text>
-            <text x="15" y="190" className="font-sans" fontSize="9" fill="#888888" opacity="0.5">Low</text>
-            <text x="295" y="190" className="font-sans" fontSize="9" fill="#888888" opacity="0.5">Calm</text>
-
-            <text x="15" y="105" className="font-mono" fontSize="10" fill="#888888">-1</text>
-            <text x="320" y="105" className="font-mono" fontSize="10" fill="#888888">1</text>
-            <text x="165" y="20" className="font-mono" fontSize="10" fill="#888888">1</text>
-            <text x="165" y="195" className="font-mono" fontSize="10" fill="#888888">-1</text>
-
-            <polyline
-              fill="none"
-              stroke="#111111"
-              strokeWidth="1.5"
-              opacity="0.4"
-              points={scatterPoints
-                .map((p, i) => {
-                  const cx = ((p.valence + 1) / 2) * 320 + 10 + i * 2;
-                  const cy = ((1 - (p.arousal + 1) / 2)) * 180 + 10 + i * 2;
-                  return `${cx},${cy}`;
-                })
-                .join(" ")}
-            />
-
-            {scatterPoints.map((point, index) => {
-              const cx = ((point.valence + 1) / 2) * 320 + 10 + index * 2;
-              const cy = ((1 - (point.arousal + 1) / 2)) * 180 + 10 + index * 2;
+          <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: firstDay }).map((_, i) => (
+              <div key={`empty-${i}`} className="w-full aspect-square" />
+            ))}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
+              const session = getSessionForDate(day);
+              const mood = session ? getMoodById(session.moodId) : null;
 
               return (
-                <motion.circle
-                  key={index}
-                  cx={cx}
-                  cy={cy}
-                  r={8}
-                  fill={point.colour}
-                  stroke="#111111"
-                  strokeWidth={2}
-                  initial={{ opacity: 0, scale: 0 }}
+                <motion.button
+                  key={day}
+                  initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.08 }}
-                />
+                  transition={{ delay: i * 0.02 }}
+                  onClick={(e) => {
+                    e.currentTarget.blur();
+                    handleDayClick(session);
+                  }}
+                  className="w-full aspect-square flex items-center justify-center relative"
+                  style={{
+                    borderRadius: "8px",
+                    backgroundColor: session ? session.colour : "#FFFBF0",
+                    border: isToday(day) ? "3px solid #111111" : session ? "2px solid #111111" : "2px dashed #D4D4D4",
+                    boxShadow: session ? "2px 2px 0px #111111" : "none",
+                  }}
+                >
+                  {mood && (
+                    <MiniBlobFace expression={mood.faceExpression} size={24} />
+                  )}
+                </motion.button>
               );
             })}
-          </svg>
+          </div>
         </NeoCard>
+
+        <div className="mb-3 mt-8 print:hidden">
+          <h2 className="font-heading text-2xl font-bold text-[#111111] uppercase tracking-wide">Monthly Summary</h2>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 md:gap-3 mb-8 print:hidden">
+          <RevealCard
+            frontTitle={<span className="text-5xl font-bold">{monthSessions.length}</span>}
+            frontSubtitle={<span className="text-xl font-bold">{"Sessions"}</span>}
+            backTitle={<span className="text-xl font-bold">{"TOTAL LOGS"}</span>}
+            backDesc={<span className="text-lg font-bold">{"Keep bulding the Habit!"}</span>}
+            colorHex="#A8E6CF"
+          />
+          <RevealCard
+            frontTitle={<span className="text-5xl font-bold">{streak}</span>}
+            frontSubtitle={<span className="text-xl font-bold">{"Streak"}</span>}
+            backTitle={<span className="text-2xl font-bold">{"Current Run"}</span>}
+            backDesc={<span className="text-lg font-bold">{"Consistency is the key."}</span>}
+            colorHex="#FFB8D4"
+          />
+          <RevealCard
+            frontTitle={
+              dominantMood ? (
+                <div className="flex items-center justify-center mt-1">
+                  <MiniBlobFace expression={dominantMood.faceExpression} size={50} />
+                </div>
+              ) : "-"
+            }
+            frontSubtitle={<span className="text-xl font-bold">{"Top Mood"}</span>}
+            backTitle={<span className="text-xl font-bold">{getTopMoodLabel()}</span>}
+            backDesc={<span className="text-xl font-bold">{dominantMood ? dominantMood.affirmation : "No dominant mood yet."}</span>}
+            colorHex={dominantMood ? dominantMood.colour : "#FFFBF0"}
+          />
+        </div>
+
+        <div className="mb-3 mt-10 print-break-inside-avoid">
+          <h2 className="font-heading text-2xl font-bold text-[#111111] uppercase tracking-wide">7-Day Retrospective</h2>
+        </div>
+
+        <NeoCard className="p-5 mb-8 print-break-inside-avoid bg-white">
+          <div className="mb-6 p-4 border-[3px] border-[#111111] bg-[#FFFBF0] rounded-xl shadow-[4px_4px_0px_#111111]">
+            <p className="font-sans text-xs text-[#111111] font-bold uppercase tracking-wider mb-1 flex items-center gap-2">
+              <span className="text-lg">💡</span> AI Insight
+            </p>
+            <p className="font-sans text-sm text-[#111111] font-bold leading-relaxed">
+              {generateInsight()}
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <p className="font-sans text-xs text-[#888888] font-bold uppercase tracking-wider mb-2">Mood Distribution</p>
+            <div className="w-full h-8 flex border-[3px] border-[#111111] rounded-lg overflow-hidden shadow-[2px_2px_0px_#111111] mb-3">
+              {getMoodDistributionBar()}
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {getMoodDistributionLegend()}
+            </div>
+          </div>
+
+          <div>
+            <p className="font-sans text-xs text-[#888888] font-bold uppercase tracking-wider mb-2">Energy & Sentiment Trend</p>
+            {renderTrendChart()}
+          </div>
+        </NeoCard>
+
+        {/* Export Button (hidden during actual print) */}
+        <div className="pb-12 print-hide">
+          <button 
+            onClick={() => window.print()}
+            className="w-full py-4 bg-[#111111] text-white font-heading font-bold text-lg uppercase tracking-widest rounded-xl border-[3px] border-[#111111] shadow-[4px_4px_0px_rgba(0,0,0,0.3)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:bg-[#333333]"
+          >
+            Export Weekly Report
+          </button>
+        </div>
       </div>
 
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>

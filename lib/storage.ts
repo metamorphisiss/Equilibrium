@@ -64,25 +64,43 @@ export function clearStorage(): void {
 
 export function generateMockSessions(): Session[] {
   const now = new Date();
-  const mockMoods: MoodId[] = ["calm", "anxious", "happy", "tired", "grateful"];
+  const sessions: Session[] = [];
 
-  return mockMoods.map((moodId, index) => {
+  const journalEntries: Record<string, string[]> = {
+    calm: ["Took a long walk today and felt really at peace with everything.", "Read a book for an hour, feeling very centered.", "Meditated this morning. The rest of the day flowed easily."],
+    anxious: ["Got really overwhelmed with my deadline today. My chest feels tight.", "Overthinking a conversation I had earlier. Hard to focus.", "Feeling jittery and unable to sit still."],
+    happy: ["Had lunch with an old friend! Laughed so much.", "Finally finished that big project. I'm so relieved and proud.", "Just a really good day. Everything seemed to go right."],
+    tired: ["Barely slept last night. Dragging myself through today.", "Long week. I just want to curl up in bed and watch TV.", "Mental exhaustion is hitting me hard this afternoon."],
+    grateful: ["Reflecting on how lucky I am to have my supportive friends.", "Someone bought my coffee today! It really made my morning.", "Just thankful for my health and a quiet evening."],
+    sad: ["Feeling really down today for no specific reason.", "Things feel a bit heavy and bleak today, just taking it slow.", "Feeling disconnected. Watched a movie to distract myself."],
+    angry: ["Someone cut me off in traffic and it ruined my morning mood.", "So frustrated with how the meeting went. Nobody listened.", "Just feeling irritable and snappy at everyone today."],
+    focused: ["Got into a deep flow state and knocked out so much work.", "Really productive morning. Cleared my entire to-do list.", "Feeling sharp and completely locked in on my goals."],
+  };
+
+  // Generate 25 days of mock data
+  for (let i = 0; i < 25; i++) {
     const date = new Date(now);
-    date.setDate(date.getDate() - (index + 1));
-    const mood = MOODS.find((m) => m.id === moodId)!;
+    date.setDate(date.getDate() - (i + 1));
+    
+    // Randomly pick a mood
+    const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
+    const entries = journalEntries[mood.id] || ["Just a normal day."];
+    const journal = entries[Math.floor(Math.random() * entries.length)];
 
-    return {
-      id: Date.now() - index * 100000,
+    sessions.push({
+      id: Date.now() - i * 100000,
       date: date.toISOString().split("T")[0],
-      moodId,
+      moodId: mood.id as MoodId,
       colour: mood.colour,
-      valence: mood.valence + (Math.random() - 0.5) * 0.2,
-      arousal: mood.arousal + (Math.random() - 0.5) * 0.2,
-      answers: ["Sample answer 1", "Sample answer 2", "Sample answer 3"],
-      journal: "This is a sample journal entry for demonstration purposes.",
+      valence: Math.max(-1, Math.min(1, mood.valence + (Math.random() - 0.5) * 0.2)),
+      arousal: Math.max(-1, Math.min(1, mood.arousal + (Math.random() - 0.5) * 0.2)),
+      answers: ["I felt productive", "Got some exercise", "Slept well"],
+      journal,
       affirmation: mood.affirmation,
-    };
-  });
+    });
+  }
+
+  return sessions;
 }
 
 export function initializeSessions(): void {

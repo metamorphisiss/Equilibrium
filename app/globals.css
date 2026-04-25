@@ -81,3 +81,21 @@
 .font-mono {
   font-family: var(--font-mono);
 }
+
+/* Print utilities for Weekly Report export */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: #FFFBF0 !important;
+  }
+
+  @page {
+    margin: 0.5cm;
+  }
+  
+  /* Ensure Neo-Brutalist shadows render perfectly in PDF */
+  * {
+    box-shadow: inherit !important;
+  }
+}
