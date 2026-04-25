@@ -30,7 +30,6 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-import { EyesCursor } from '@/components/eyes-cursor'
 
 export default function RootLayout({
   children,
@@ -40,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-[#FFFBF0]">
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <EyesCursor />
+
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
