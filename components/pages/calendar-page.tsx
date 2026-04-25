@@ -26,7 +26,7 @@ const getMoodSvg = (moodId: string, size: number) => {
   }
 };
 import { getSessions, getSessionsForMonth, getDominantMood, calculateStreak, initializeSessions, type Session } from "@/lib/storage";
-import { getMoodById, MOODS } from "@/lib/moods";
+import { getMoodById, MOODS, type MoodId } from "@/lib/moods";
 import {
   Drawer,
   DrawerContent,
@@ -41,9 +41,9 @@ const RevealCard = ({
   colorHex = "#FFFBF0",
 }: {
   frontTitle: React.ReactNode;
-  frontSubtitle: string;
-  backTitle: string;
-  backDesc: string;
+  frontSubtitle: React.ReactNode;
+  backTitle: React.ReactNode;
+  backDesc: React.ReactNode;
   colorHex?: string;
 }) => {
   return (
@@ -170,7 +170,7 @@ export function CalendarPage() {
     last7Sessions.forEach(s => counts[s.moodId] = (counts[s.moodId] || 0) + 1);
     
     return Object.entries(counts).map(([moodId, count]) => {
-      const mood = getMoodById(moodId);
+      const mood = getMoodById(moodId as MoodId);
       const percentage = (count / last7Sessions.length) * 100;
       return (
         <div 
@@ -188,7 +188,7 @@ export function CalendarPage() {
     last7Sessions.forEach(s => counts[s.moodId] = (counts[s.moodId] || 0) + 1);
     
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([moodId, count]) => {
-      const mood = getMoodById(moodId);
+      const mood = getMoodById(moodId as MoodId);
       const percentage = Math.round((count / last7Sessions.length) * 100);
       return (
         <div key={moodId} className="flex items-center gap-1.5">

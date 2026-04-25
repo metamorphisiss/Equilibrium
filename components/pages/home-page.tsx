@@ -9,6 +9,9 @@ import { NeoButton } from "@/components/neo-button";
 import { getUser, getSessions, initializeSessions, calculateStreak, type Session } from "@/lib/storage";
 import { MOODS, type MoodId } from "@/lib/moods";
 import { LogoLoop } from "@/components/logo-loop";
+import dynamic from "next/dynamic";
+
+const Ballpit = dynamic(() => import("@/components/ballpit").then((mod) => mod.Ballpit), { ssr: false });
 
 const AFFIRMATIONS = [
   "You are capable of amazing things.",
@@ -92,7 +95,20 @@ export function HomePage() {
 
         <LogoLoop />
 
-        <NeoCard className="p-5 mb-4 mt-6" colour="#FFFFFF">
+        {/* Ballpit Interactive Container */}
+        <NeoCard className="mb-4 mt-6 relative overflow-hidden shadow-[4px_4px_0px_#111111] h-[300px] p-0" colour="#111111">
+          <div className="absolute top-4 left-4 z-10 pointer-events-none">
+            <h3 className="font-heading text-sm font-bold text-[#111111] bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border-2 border-[#111111] uppercase tracking-wider">
+              Playful Space
+            </h3>
+          </div>
+          <Ballpit
+            count={30}
+            colors={['#FF8C69', '#FFE566', '#A8E6CF', '#C9B8FF', '#FFB8D4']}
+          />
+        </NeoCard>
+
+        <NeoCard className="p-5 mb-4" colour="#FFFFFF">
           <h3 className="font-heading text-base font-bold text-[#111111] mb-3">
             Daily Check-in
           </h3>
@@ -104,41 +120,19 @@ export function HomePage() {
           </NeoButton>
         </NeoCard>
 
-        <NeoCard 
-          className="p-5 mb-4 relative overflow-hidden group cursor-pointer" 
+        <NeoCard
+          className="p-5 mb-4 relative overflow-hidden group cursor-pointer"
           colour="#C9B8FF"
           onClick={() => setCurrentAffirmationIndex((prev) => (prev + 1) % AFFIRMATIONS.length)}
         >
-          {/* Moving animated background elements */}
-          <motion.div 
-            animate={{ 
-              x: [0, -30, 20, 0], 
-              y: [0, 20, -30, 0],
-              scale: [1, 1.2, 0.9, 1]
-            }} 
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          {/* Subtle animated background element */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             className="absolute -top-10 -right-10 w-40 h-40 bg-[#FFCDD2] rounded-full opacity-60 blur-2xl pointer-events-none"
           />
-          <motion.div 
-            animate={{ 
-              x: [0, 40, -20, 0], 
-              y: [0, -40, 30, 0],
-              scale: [1, 1.4, 0.8, 1]
-            }} 
-            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A8E6CF] rounded-full opacity-50 blur-2xl pointer-events-none"
-          />
-          <motion.div 
-            animate={{ 
-              x: [0, -20, 40, 0], 
-              y: [0, 30, -20, 0],
-              scale: [0.8, 1.1, 1, 0.8]
-            }} 
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/4 w-24 h-24 bg-[#FFE566] rounded-full opacity-40 blur-xl pointer-events-none"
-          />
           <h2 className="font-heading text-lg font-bold text-[#111111] mb-2 relative z-10 flex items-center gap-2">
-            <span className="text-xl">✨</span> Daily Affirmation
+            <span className="text-xl"></span> Daily Affirmation
           </h2>
           <div className="h-24 flex items-center relative z-10">
             <AnimatePresence mode="wait">
