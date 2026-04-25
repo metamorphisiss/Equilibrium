@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+
 import { NeoCard } from "@/components/neo-card";
 import { NeoChip } from "@/components/neo-button";
 import { NeoButton } from "@/components/neo-button";
@@ -13,11 +14,21 @@ import { LogoLoop } from "@/components/logo-loop";
 const AFFIRMATIONS = [
   "You are capable of amazing things.",
   "Every day is a fresh start.",
+  "Your potential is limitless.",
+  "Embrace the journey, not just the destination.",
   "You are stronger than you think.",
-  "Trust the process and yourself.",
-  "Progress, not perfection.",
-  "Breathe in courage, exhale doubt.",
-  "Your potential is endless.",
+  "Small steps lead to big changes.",
+  "Trust the process.",
+  "You deserve to be happy."
+];
+
+const RIPPLE_COLORS = [
+  "#C9B8FF", // pastel purple (default)
+  "#FFCDD2", // pastel red
+  "#A8E6CF", // pastel green
+  "#F8E8A6", // pastel yellow
+  "#A2C8F3", // pastel blue
+  "#FFD3B6", // peach
 ];
 
 export function HomePage() {
@@ -26,6 +37,32 @@ export function HomePage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [streak, setStreak] = useState(0);
   const [currentAffirmationIndex, setCurrentAffirmationIndex] = useState(0);
+
+  // Ripple effect state
+  const [baseColor, setBaseColor] = useState(RIPPLE_COLORS[0]);
+  const [currentColorIndex, setCurrentColorIndex] = useState(0);
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
+
+  const handleAffirmationClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const nextColorIndex = (currentColorIndex + 1) % RIPPLE_COLORS.length;
+    const nextColor = RIPPLE_COLORS[nextColorIndex];
+
+    const newRipple = { id: Date.now(), x, y, color: nextColor };
+
+    setRipples((prev) => [...prev, newRipple]);
+    setCurrentColorIndex(nextColorIndex);
+    setCurrentAffirmationIndex((prev) => (prev + 1) % AFFIRMATIONS.length);
+
+    // After animation completes, update base color and remove ripple
+    setTimeout(() => {
+      setBaseColor(nextColor);
+      setRipples((prev) => prev.filter((r) => r.id !== newRipple.id));
+    }, 800);
+  };
 
   useEffect(() => {
     const userData = getUser();
@@ -104,59 +141,55 @@ export function HomePage() {
           </NeoButton>
         </NeoCard>
 
-        <NeoCard 
-          className="p-5 mb-4 relative overflow-hidden group cursor-pointer" 
-          colour="#C9B8FF"
-          onClick={() => setCurrentAffirmationIndex((prev) => (prev + 1) % AFFIRMATIONS.length)}
+        <NeoCard
+          className="p-5 mb-4 relative overflow-hidden group cursor-pointer"
+          colour={baseColor}
+          onClick={handleAffirmationClick}
         >
-          {/* Moving animated background elements */}
-          <motion.div 
-            animate={{ 
-              x: [0, -30, 20, 0], 
-              y: [0, 20, -30, 0],
-              scale: [1, 1.2, 0.9, 1]
-            }} 
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-10 -right-10 w-40 h-40 bg-[#FFCDD2] rounded-full opacity-60 blur-2xl pointer-events-none"
-          />
-          <motion.div 
-            animate={{ 
-              x: [0, 40, -20, 0], 
-              y: [0, -40, 30, 0],
-              scale: [1, 1.4, 0.8, 1]
-            }} 
-            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A8E6CF] rounded-full opacity-50 blur-2xl pointer-events-none"
-          />
-          <motion.div 
-            animate={{ 
-              x: [0, -20, 40, 0], 
-              y: [0, 30, -20, 0],
-              scale: [0.8, 1.1, 1, 0.8]
-            }} 
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/4 w-24 h-24 bg-[#FFE566] rounded-full opacity-40 blur-xl pointer-events-none"
-          />
-          <h2 className="font-heading text-lg font-bold text-[#111111] mb-2 relative z-10 flex items-center gap-2">
-            <span className="text-xl">✨</span> Daily Affirmation
-          </h2>
-          <div className="h-24 flex items-center relative z-10">
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={currentAffirmationIndex}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.5 }}
-                className="font-sans text-[22px] font-black text-[#111111] leading-tight"
-              >
-                "{AFFIRMATIONS[currentAffirmationIndex]}"
-              </motion.p>
-            </AnimatePresence>
+          {/* Expanding click-origin ripples */}
+          <AnimatePresence>
+            {ripples.map((ripple) => (
+              <motion.div
+                key={ripple.id}
+                initial={{ width: 0, height: 0, opacity: 1 }}
+                animate={{ width: 1200, height: 1200, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  backgroundColor: ripple.color,
+                  left: ripple.x,
+                  top: ripple.y,
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 0,
+                }}
+              />
+            ))}
+          </AnimatePresence>
+
+          {/* Content layer (z-10 to sit above ripples) */}
+          <div className="relative z-10 pointer-events-none">
+            <h2 className="font-heading text-lg font-bold text-[#111111] mb-2 flex items-center gap-2">
+              Daily Affirmation
+            </h2>
+            <div className="h-24 flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={currentAffirmationIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5 }}
+                  className="font-sans text-[22px] font-black text-[#111111] leading-tight"
+                >
+                  "{AFFIRMATIONS[currentAffirmationIndex]}"
+                </motion.p>
+              </AnimatePresence>
+            </div>
+            <p className="text-xs font-sans font-bold text-[#666666] uppercase tracking-widest mt-2 flex justify-end">
+              Tap for another →
+            </p>
           </div>
-          <p className="font-sans text-[10px] text-[#444444] font-bold uppercase tracking-widest absolute bottom-4 right-5 opacity-50">
-            Tap to refresh
-          </p>
         </NeoCard>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
