@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { NeoCard } from "@/components/neo-card";
 import { NeoChip } from "@/components/neo-button";
 import { NeoButton } from "@/components/neo-button";
@@ -10,11 +10,22 @@ import { getUser, getSessions, initializeSessions, calculateStreak, type Session
 import { MOODS, type MoodId } from "@/lib/moods";
 import { LogoLoop } from "@/components/logo-loop";
 
+const AFFIRMATIONS = [
+  "You are capable of amazing things.",
+  "Every day is a fresh start.",
+  "You are stronger than you think.",
+  "Trust the process and yourself.",
+  "Progress, not perfection.",
+  "Breathe in courage, exhale doubt.",
+  "Your potential is endless.",
+];
+
 export function HomePage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<{ name: string } | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [streak, setStreak] = useState(0);
+  const [currentAffirmationIndex, setCurrentAffirmationIndex] = useState(0);
 
   useEffect(() => {
     const userData = getUser();
@@ -28,6 +39,12 @@ export function HomePage() {
     const sessionsData = getSessions();
     setSessions(sessionsData);
     setStreak(calculateStreak(sessionsData));
+
+    const interval = setInterval(() => {
+      setCurrentAffirmationIndex((prev) => (prev + 1) % AFFIRMATIONS.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [navigate]);
 
   const getStressLevel = () => {
@@ -39,11 +56,6 @@ export function HomePage() {
   };
 
   const stressLevel = getStressLevel();
-  const quickMoods: MoodId[] = ["happy", "anxious", "calm", "tired"];
-
-  const handleMoodSelect = (moodId: MoodId) => {
-    navigate("/quiz/mood", { state: { preselectedMood: moodId } });
-  };
 
   if (!user) return null;
 
@@ -80,26 +92,71 @@ export function HomePage() {
 
         <LogoLoop />
 
-        <NeoCard className="p-5 mb-4">
-          <h2 className="font-heading text-lg font-bold text-[#111111] mb-4">
-            How are you feeling?
+        <NeoCard className="p-5 mb-4 mt-6" colour="#FFFFFF">
+          <h3 className="font-heading text-base font-bold text-[#111111] mb-3">
+            Daily Check-in
+          </h3>
+          <NeoButton
+            onClick={() => navigate("/quiz/mood")}
+            fullWidth
+          >
+            Log today&apos;s mood
+          </NeoButton>
+        </NeoCard>
+
+        <NeoCard 
+          className="p-5 mb-4 relative overflow-hidden group cursor-pointer" 
+          colour="#C9B8FF"
+          onClick={() => setCurrentAffirmationIndex((prev) => (prev + 1) % AFFIRMATIONS.length)}
+        >
+          {/* Moving animated background elements */}
+          <motion.div 
+            animate={{ 
+              x: [0, -30, 20, 0], 
+              y: [0, 20, -30, 0],
+              scale: [1, 1.2, 0.9, 1]
+            }} 
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-10 -right-10 w-40 h-40 bg-[#FFCDD2] rounded-full opacity-60 blur-2xl pointer-events-none"
+          />
+          <motion.div 
+            animate={{ 
+              x: [0, 40, -20, 0], 
+              y: [0, -40, 30, 0],
+              scale: [1, 1.4, 0.8, 1]
+            }} 
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A8E6CF] rounded-full opacity-50 blur-2xl pointer-events-none"
+          />
+          <motion.div 
+            animate={{ 
+              x: [0, -20, 40, 0], 
+              y: [0, 30, -20, 0],
+              scale: [0.8, 1.1, 1, 0.8]
+            }} 
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/2 left-1/4 w-24 h-24 bg-[#FFE566] rounded-full opacity-40 blur-xl pointer-events-none"
+          />
+          <h2 className="font-heading text-lg font-bold text-[#111111] mb-2 relative z-10 flex items-center gap-2">
+            <span className="text-xl">✨</span> Daily Affirmation
           </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {quickMoods.map((moodId) => {
-              const mood = MOODS.find((m) => m.id === moodId)!;
-              return (
-                <NeoChip
-                  key={moodId}
-                  colour={mood.colour}
-                  selected
-                  onClick={() => handleMoodSelect(moodId)}
-                  className="py-3"
-                >
-                  {mood.label}
-                </NeoChip>
-              );
-            })}
+          <div className="h-24 flex items-center relative z-10">
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={currentAffirmationIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.5 }}
+                className="font-sans text-[22px] font-black text-[#111111] leading-tight"
+              >
+                "{AFFIRMATIONS[currentAffirmationIndex]}"
+              </motion.p>
+            </AnimatePresence>
           </div>
+          <p className="font-sans text-[10px] text-[#444444] font-bold uppercase tracking-widest absolute bottom-4 right-5 opacity-50">
+            Tap to refresh
+          </p>
         </NeoCard>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
@@ -132,17 +189,6 @@ export function HomePage() {
           </NeoCard>
         </div>
 
-        <NeoCard className="p-5 mb-4" colour="#FFFFFF">
-          <h3 className="font-heading text-base font-bold text-[#111111] mb-3">
-            Daily Check-in
-          </h3>
-          <NeoButton
-            onClick={() => navigate("/quiz/mood")}
-            fullWidth
-          >
-            Log today&apos;s mood
-          </NeoButton>
-        </NeoCard>
 
         <NeoCard className="p-5" colour="#FFE566">
           <div className="flex items-center gap-4">
