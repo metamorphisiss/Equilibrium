@@ -406,7 +406,7 @@ export function BreathingPage() {
         </motion.div>
       </div>
 
-      <div className="relative z-10 flex flex-col items-center px-4 mb-2 mt-2">
+      <div className="relative z-10 flex flex-col items-center px-4 mb-0 mt-0">
         <div className="flex gap-2 justify-center flex-wrap mb-4">
           {PATTERNS.map((pattern) => (
             <motion.div key={pattern.name} whileHover={{ y: -2 }}>
@@ -438,9 +438,9 @@ export function BreathingPage() {
         <StepGraph pattern={selectedPattern} phase={phase} timeRemaining={timeRemaining} isRunning={isRunning} />
       </div>
 
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 mt-8">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 mt-0">
         {/* Brutalist Circle Container + Infinity Symbol */}
-        <div className="mb-12 relative flex items-center justify-center" style={{ width: 280, height: 280 }}>
+        <div className="mb-2 relative flex items-center justify-center" style={{ width: 280, height: 280 }}>
 
           <motion.div
             animate={scaleControls}
@@ -503,7 +503,7 @@ export function BreathingPage() {
           </motion.div>
         )}
 
-        <div className="flex gap-3 mt-12 w-full max-w-xs">
+        <div className="flex gap-3 mt-4 w-full max-w-xs">
           {!isRunning ? (
             <motion.div whileHover={{ scale: 1.02 }} className="w-full">
               <NeoButton onClick={handleStart} fullWidth>

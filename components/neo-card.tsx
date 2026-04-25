@@ -7,7 +7,7 @@ interface NeoCardProps {
   children: React.ReactNode;
   className?: string;
   colour?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<any>) => void;
   interactive?: boolean;
   accentColour?: string;
 }
