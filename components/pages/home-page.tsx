@@ -8,6 +8,7 @@ import { NeoChip } from "@/components/neo-button";
 import { NeoButton } from "@/components/neo-button";
 import { getUser, getSessions, initializeSessions, calculateStreak, type Session } from "@/lib/storage";
 import { MOODS, type MoodId } from "@/lib/moods";
+import { LogoLoop } from "@/components/logo-loop";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -76,6 +77,8 @@ export function HomePage() {
             </svg>
           </motion.button>
         </div>
+
+        <LogoLoop />
 
         <NeoCard className="p-5 mb-4">
           <h2 className="font-heading text-lg font-bold text-[#111111] mb-4">
