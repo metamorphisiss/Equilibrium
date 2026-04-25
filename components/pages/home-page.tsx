@@ -130,17 +130,42 @@ export function HomePage() {
           </motion.button>
         </div>
 
-        <LogoLoop />
-
-        {/* Ballpit Interactive Container */}
-        <NeoCard className="mb-4 mt-6 relative overflow-hidden shadow-[4px_4px_0px_#111111] h-[300px] p-0" colour="#111111">
-          <div className="absolute top-4 left-4 z-10 pointer-events-none">
-            <h3 className="font-heading text-sm font-bold text-[#111111] bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border-2 border-[#111111] uppercase tracking-wider">
-              Playful Space
-            </h3>
-          </div>
+        <NeoCard className="mb-4 relative overflow-hidden shadow-[4px_4px_0px_#111111] h-[300px] p-0" colour="#FFFFFF">
+          {/* Top Caption - Foreground with Pop Animations & Background */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.5, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ 
+              type: "spring",
+              damping: 15,
+              stiffness: 300,
+              delay: 0.2
+            }}
+            className="absolute inset-x-0 top-8 flex flex-col items-center pointer-events-none select-none z-20"
+          >
+            <div className="bg-white px-6 py-4 rounded-2xl border-2 border-[#111111] shadow-[4px_4px_0px_#111111] flex flex-col items-center">
+              <motion.h2 
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{ 
+                  duration: 1.5, 
+                  repeat: Infinity, 
+                  ease: "anticipate" 
+                }}
+                className="font-heading text-4xl font-black text-[#111111] leading-none"
+              >
+                Equilibrium
+              </motion.h2>
+              <motion.p 
+                className="font-sans text-[10px] font-bold text-[#111111] uppercase tracking-[0.4em] mt-2"
+              >
+                Your Wellness Journey
+              </motion.p>
+            </div>
+          </motion.div>
           <Ballpit
-            count={30}
+            count={10}
             colors={['#FF8C69', '#FFE566', '#A8E6CF', '#C9B8FF', '#FFB8D4']}
           />
         </NeoCard>

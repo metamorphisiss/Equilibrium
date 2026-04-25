@@ -1,6 +1,25 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
+import {
+  HappyGreenMood,
+  SadOrangeMood,
+  FrustratedGreenMood,
+  SadBlueMood,
+  SadPurpleMood,
+  HappyBlueMood,
+  HappyPinkMood
+} from "./common-svgs";
+
+const MOOD_ICONS = [
+  HappyGreenMood,
+  SadOrangeMood,
+  FrustratedGreenMood,
+  SadBlueMood,
+  SadPurpleMood,
+  HappyBlueMood,
+  HappyPinkMood
+];
 
 interface Ball {
   id: number;
@@ -30,7 +49,7 @@ export const Ballpit = ({
   const [balls] = useState<Ball[]>(() => {
     const arr: Ball[] = [];
     for (let i = 0; i < count; i++) {
-      const radius = Math.random() * 12 + 16; // 16 to 28px
+      const radius = Math.random() * 10 + 35; // 35 to 45px
       arr.push({
         id: i,
         x: Math.random() * 300,
@@ -180,7 +199,7 @@ export const Ballpit = ({
   return (
     <div 
       ref={containerRef} 
-      className="w-full h-full relative overflow-hidden bg-[#111111]"
+      className="w-full h-full relative overflow-hidden bg-transparent"
       onPointerMove={handlePointerMove}
       onPointerLeave={() => { pointerRef.current.active = false; }}
       onPointerDown={(e) => { 
@@ -192,19 +211,22 @@ export const Ballpit = ({
       onPointerUp={() => { pointerRef.current.active = false; }}
       style={{ touchAction: 'none' }}
     >
-      {balls.map((b) => (
-        <div
-          key={b.id}
-          className="absolute top-0 left-0 rounded-full border-[3px] border-[#111111]"
-          style={{
-            width: `${b.radius * 2}px`,
-            height: `${b.radius * 2}px`,
-            backgroundColor: b.color,
-            boxShadow: 'inset -4px -4px 0px rgba(0,0,0,0.15)',
-            willChange: 'transform'
-          }}
-        />
-      ))}
+      {balls.map((b, i) => {
+        const MoodIcon = MOOD_ICONS[i % MOOD_ICONS.length];
+        return (
+          <div
+            key={b.id}
+            className="absolute top-0 left-0"
+            style={{
+              width: `${b.radius * 2}px`,
+              height: `${b.radius * 2}px`,
+              willChange: 'transform'
+            }}
+          >
+            <MoodIcon size={b.radius * 2} />
+          </div>
+        );
+      })}
     </div>
   );
 };

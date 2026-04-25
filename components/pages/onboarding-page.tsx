@@ -7,6 +7,7 @@ import { BreathingBlob } from "@/components/squircle-character";
 import { NeoButton } from "@/components/neo-button";
 import { NeoCard } from "@/components/neo-card";
 import { getUser, saveUser } from "@/lib/storage";
+import { LogoLoop } from "@/components/logo-loop";
 
 export function OnboardingPage() {
   const navigate = useNavigate();
@@ -41,11 +42,13 @@ export function OnboardingPage() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.25 }}
-      className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
+      className="min-h-screen flex flex-col items-center px-6 overflow-x-hidden"
       style={{ backgroundColor: "#FFFBF0" }}
     >
-      <div className="w-full max-w-sm flex flex-col items-center gap-8">
-        <BreathingBlob colour="#A8E6CF" size={140} />
+      <LogoLoop />
+
+      <div className="flex-1 w-full max-w-sm flex flex-col items-center justify-center gap-8 py-6">
+
 
         <div className="text-center">
           <h1 className="font-heading text-3xl font-bold text-[#111111] mb-2">
@@ -134,6 +137,8 @@ export function OnboardingPage() {
           Begin Journey
         </NeoButton>
       </div>
+
+      <LogoLoop />
     </motion.div>
   );
 }
